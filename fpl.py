@@ -1,47 +1,29 @@
 import requests
 import pandas as pd
 
-url = "https://fantasy.premierleague.com/api/bootstrap-static/"   #this is the URL we need to get the data from
-response = requests.get(url)  #we asked URL for its data and stored it in response
-# print(response.status_code) this is to see if the request was sucessful, 200 indiciates yes
-data = response.json() #converts the recieved code into a JSON file
-# print(data.keys()) what types of data FPL sent me
-players = pd.DataFrame(data["elements"]) #creating a Pandas Dataframe of all players and their data
-#print(players)
-#print(players.columns.tolist()) all the players and data 
-# print(players[["web_name", "now_cost", "total_points", "goals_scored", "assists"]].head(10)), this prints the first 10 players attributes
+history_df = pd.read_csv(r"E:/Visual Code/FPL/fpl_history.csv")
 
+print(history_df.shape)
 
-# player_id = players.iloc[0]["id"] #gets each players ID
-# url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/" 
-# response = requests.get(url)
-# player_data = response.json()
-# print(player_data.keys()) 
-# history = pd.DataFrame(player_data["history"])
-# print(history.head())
-# print(history.columns.tolist())
-#so far we got player 0s (Rayas) data and we are looking at his past gameweeks
-all_history = []
-for index, player in players.iterrows():
+#so rn we have the 26/27 seasons data, now for the previous season (we can get rid of all the ugly code cuz we now just read the csv file)
 
-    player_id = player["id"]
+seasons = ["2021-22", "2022-23", "2023-24", "2024-25", "2025-26"]
 
-    url = f"https://fantasy.premierleague.com/api/element-summary/{player_id}/"
+historical_data = []
 
-    response = requests.get(url)
+for season in seasons:
 
-    player_data = response.json()
+    url = f"https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/{season}/gws/merged_gw.csv"
 
-    print(player["web_name"], len(player_data["history"]))
-    all_history.append(player_data["history"])
-    print(len(all_history))
+    season_data = pd.read_csv(url)
 
-history_df = pd.concat([pd.DataFrame(h) for h in all_history], ignore_index=True) #creates a data frame with each players GW accompanied with stats
+    historical_data.append(season_data)
 
-print(history_df.shape) #tells us how many rows and columns
+  #  print(season, season_data.shape)
 
-history_df.to_csv("fpl_history.csv", index=False)
+historical_df = pd.concat(historical_data, ignore_index=True)
 
-#so rn we have the 26/27 seasons data, now for the previous season
+print(historical_df.shape)
 
+historical_df.to_csv("fpl_historical.csv", index=False)
 
